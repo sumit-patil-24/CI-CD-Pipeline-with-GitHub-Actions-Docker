@@ -1,13 +1,14 @@
 const request = require('supertest');
-const app = require('../app');  // Import the app instance
 const { expect } = require('chai');
+const app = require('../app');  // Import the app instance
 
 describe('GET /', () => {
   let server;
   
   // Start server before tests
   before((done) => {
-    server = app.listen(0, done);  // Use port 0 for random available port
+    // Use port 0 to get a random available port
+    server = app.listen(0, done);
   });
   
   // Close server after tests

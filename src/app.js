@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
   res.send(`
@@ -278,7 +278,7 @@ app.get('/', (req, res) => {
 });
 module.exports = app;
 
-// Start server only when not in test environment
+// Only start server if not in test environment
 if (process.env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
@@ -291,6 +291,4 @@ if (process.env.NODE_ENV !== 'test') {
       process.exit(0);
     });
   });
-} 
- 
-// CI/CD Pipeline
+}
