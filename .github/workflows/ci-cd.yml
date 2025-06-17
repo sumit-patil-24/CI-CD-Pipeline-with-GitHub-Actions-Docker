@@ -1,0 +1,41 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Build Docker image
+        run: docker build -t anugrah28/ci-cd-demo .
+        
+      - name: Run tests
+        run: |
+          docker run --name test-container -d anugrah28/ci-cd-demo
+          docker exec test-container npm test
+          docker stop test-container && docker rm test-container
+          
+  deploy:
+    needs: build-test
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Stop and remove existing container
+        run: |
+          docker stop running-app || true
+          docker rm running-app || true
+          
+      - name: Deploy application
+        run: |
+          docker build -t anugrah28/ci-cd-demo .
+          docker run -d --restart always -p 3000:3000 --name running-app anugrah28/ci-cd-demo
