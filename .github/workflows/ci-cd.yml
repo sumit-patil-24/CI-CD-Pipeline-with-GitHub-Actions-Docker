@@ -3,8 +3,6 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build-test:
@@ -12,16 +10,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Build Docker image
         run: docker build -t anugrah28/ci-cd-demo .
-        
+
       - name: Run tests
         run: |
           docker run --name test-container -d anugrah28/ci-cd-demo
-          docker exec test-container npm test
+          docker exec test-container npm run test
           docker stop test-container && docker rm test-container
-          
+
   deploy:
     needs: build-test
     runs-on: self-hosted
