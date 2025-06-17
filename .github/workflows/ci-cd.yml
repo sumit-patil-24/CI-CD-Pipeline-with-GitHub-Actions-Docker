@@ -51,13 +51,19 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Pull Docker image
-        run: docker pull anugrah28/ci-cd-demo:latest
+      - name: Checkout code
+        uses: actions/checkout@v4
         
-      - name: Stop and remove existing container
+      - name: Stop and remove existing containers
         run: |
-          docker stop running-app || true
-          docker rm running-app || true
+          docker stop $(docker ps -q --filter publish=3000) 2>/dev/null || true
+          docker rm -f running-app 2>/dev/null || true
+          sleep 5
           
       - name: Deploy application
-        run: docker run -d --restart always -p 3000:3000 --name running-app anugrah28/ci-cd-demo:latest
+        run: |
+          docker run -d \
+            --restart always \
+            -p 3000:3000 \
+            --name running-app \
+            anugrah28/ci-cd-demo:latest
