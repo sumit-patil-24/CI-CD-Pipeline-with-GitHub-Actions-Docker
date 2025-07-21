@@ -66,5 +66,5 @@ jobs:
             --restart always \
             -p 3000:3000 \
             --name running-app \
-            anugrah28/ci-cd-demo:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/ci-cd-demo:latest
             
