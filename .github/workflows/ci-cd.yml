@@ -62,6 +62,10 @@ jobs:
           
           
       - name: Deploy application
-        run: |
-          docker run -d -p 3000:3000 --name running-app ${{ secrets.DOCKERHUB_USERNAME }}/ci-cd-demo:latest
-            
+        uses: docker/run-action@v2
+        with:
+          image: ${{ secrets.DOCKER_USERNAME }}/myimage:latest
+          run: |
+            docker run -d -p 3000:3000 --name running-app ${{ secrets.DOCKERHUB_USERNAME }}/ci-cd-demo:latest
+        
+       
