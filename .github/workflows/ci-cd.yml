@@ -63,9 +63,5 @@ jobs:
           
       - name: Deploy application
         run: |
-          docker run -d \
-            --restart always \
-            -p 3000:3000 \
-            --name running-app \
-            ${{ secrets.DOCKERHUB_USERNAME }}/ci-cd-demo:latest
+          docker run -d -p 3000:3000 --name running-app ${{ secrets.DOCKERHUB_USERNAME }}/ci-cd-demo:latest
             
