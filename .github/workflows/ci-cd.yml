@@ -56,7 +56,7 @@ jobs:
           docker push "${ECR_REPO}:${TAG}"
 
 
-/*
+
   deploy:
     runs-on: self-hosted
     needs: build
@@ -87,4 +87,4 @@ jobs:
             -p 3000:3000 \
             --name running-app \
             ${{ secrets.DOCKERHUB_USERNAME }}/ci-cd-demo:latest
-*/
+
