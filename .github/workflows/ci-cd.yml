@@ -52,7 +52,7 @@ jobs:
           TAG="$(echo ${{ github.sha }} | cut -c1-7)"
           AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
           ECR_REPO="${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/my-repository"
-          docker build -t "${ECR_REPO}:${TAG}" 
+          docker build -t "${ECR_REPO}:${TAG}" .
           docker push "${ECR_REPO}:${TAG}"
 
 
