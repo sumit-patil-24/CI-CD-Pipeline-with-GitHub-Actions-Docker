@@ -69,5 +69,5 @@ http://EC2_IP:5000
 1. Automate the infrastructure creation using github workflows and terraform.
 infrastructure is vpc, private subnets, ec2, security group. 
 2. Using s3 as backend to store terraform.tfstate file.
-3. Prometheus and Grafana setup for monitoring.
+3. Prometheus with Alert Manager and Grafana setup for monitoring.
 4. EFK Stack setup for logging.
