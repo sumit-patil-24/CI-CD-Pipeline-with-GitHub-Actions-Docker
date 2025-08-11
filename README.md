@@ -1,19 +1,12 @@
-# 🚀 CI/CD Pipeline with GitHub Actions & Docker
-
-[![CI/CD Pipeline](https://github.com/AnugrahMassey/CI-CD-Pipeline-with-GitHub-Actions-Docker/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/AnugrahMassey/CI-CD-Pipeline-with-GitHub-Actions-Docker/actions)
-[![Docker Image](https://img.shields.io/docker/pulls/anugrah28/ci-cd-demo?logo=docker)](https://hub.docker.com/r/anugrah28/ci-cd-demo)
-
-A fully automated CI/CD pipeline using GitHub Actions and Docker that builds, tests, and deploys applications locally without cloud services.
-
-![Project Dashboard ](https://github.com/user-attachments/assets/35f4d15e-849f-452c-b60d-26b8de08e51f)
+# 🚀 Zero Touch Automation using CI/CD Pipeline with GitHub Actions & Docker & k8s
 
 
 ## ✨ Features
 
 - **Automated Testing**: Jest/Mocha tests run on every push
 - **Docker Build**: Containerization with multi-stage builds
-- **Self-Hosted Deployment**: Runs on your local machine
-- **No Cloud Required**: Entire pipeline executes locally
+- **Self-Hosted Deployment**: no need to build or push images and apply changes
+- **No VM Required**: Entire CI pipeline executes locally
 - **Real-time Monitoring**: Dashboard shows deployment status
 
 ## 🛠️ Technology Stack
@@ -21,61 +14,29 @@ A fully automated CI/CD pipeline using GitHub Actions and Docker that builds, te
 | Component             | Technology                          |
 |-----------------------|-------------------------------------|
 | CI/CD Pipeline        | GitHub Actions                      |
-| Containerization      | Docker                              |
-| Web Framework         | Node.js + Express                   |
-| Testing Framework     | Mocha + Chai                        |
-| Local Orchestration   | Docker Compose                      |
-| Deployment            | Self-Hosted Runner                  |
+| Containerization      | Docker with ECR                     |
+| Orchestration         | Kubernetes & Argocd                 |
+| Monitor               | Prometheus + Grafana                |
+
 
 ## ⚙️ How It Works
 
 ```mermaid
 graph LR
-    A[Code Push] --> B[GitHub Actions]
+    A[Code Push to src folder] --> B[GitHub Actions]
     B --> C[Build Docker Image]
-    C --> D[Run Tests]
-    D --> E[Push to Docker Hub]
-    E --> F[Deploy to Local Machine]
-    F --> G[Access at localhost:3000]
+    C --> D[Push to ECR Registry]
+    D --> E[Image tag updated in helm-chart folder]
+    E --> F[Argocd pickups changes]
+    F --> G[Access application using ec2 IP and port]
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Docker
-- Node.js 18+
-- Git
+- Provide AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ACCOUNT_ID, in github secrets
+- k8s cluster running and argocd is installed 
 
-### Local Installation
-```bash
-# Clone repository
-git clone https://github.com/AnugrahMassey/CI-CD-Pipeline-with-GitHub-Actions-Docker.git
-cd CI-CD-Pipeline-with-GitHub-Actions-Docker
-
-# Install dependencies
-npm install
-
-# Run locally
-npm start
-```
-
-### Pipeline Setup
-1. Set up a self-hosted runner:
-```bash
-mkdir ~/actions-runner && cd ~/actions-runner
-curl -o actions-runner-linux-x64.tar.gz -L https://github.com/actions/runner/releases/download/vX.X.X/actions-runner-linux-x64-X.X.X.tar.gz
-tar xzf actions-runner-linux-x64.tar.gz
-./config.sh --url https://github.com/AnugrahMassey/CI-CD-Pipeline-with-GitHub-Actions-Docker --token YOUR_TOKEN
-./run.sh
-```
-
-2. Add GitHub Secrets:
-   - `DOCKERHUB_USERNAME`
-   - `DOCKERHUB_TOKEN`
-
-## 📊 Pipeline Workflow
-
-![GitHub Actions Workflow](https://github.com/user-attachments/assets/95267c14-6f1d-4561-b8ac-25b879978077)
 
 
 ## 📂 Project Structure
@@ -84,6 +45,10 @@ CI-CD-Pipeline-with-GitHub-Actions-Docker/
 ├── .github/
 │   └── workflows/
 │       └── ci-cd.yml
+├── helm-chart/
+├── terraform/
+│   ├── main.tf
+│   └── user_data.sh 
 ├── src/
 │   ├── app.js
 │   └── test/
@@ -99,10 +64,7 @@ After successful deployment:
 ```
 http://localhost:3000
 ```
-
-## 📝 Project Report
-[Download Project Report PDF](https://github.com/user-attachments/files/20777271/CI_CD.Pipeline.PR.pdf)
-
-## 🤝 Contributing
-Pull requests are welcome! For major changes, please open an issue first to discuss the changes you'd like to make.
-
+## Future Work
+1. Automate the infrastructure creation using github workflows and terraform.
+infrastructure is vpc, private subnets, ec2, security group. 
+2. Using s3 as backend to store terraform.tfstate file.
