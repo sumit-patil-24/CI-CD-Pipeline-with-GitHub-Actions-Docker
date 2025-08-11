@@ -34,8 +34,9 @@ graph LR
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Provide AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ACCOUNT_ID, in github secrets
-- k8s cluster running and argocd is installed 
+- Provide AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ACCOUNT_ID, in github secrets.
+- k8s cluster running and argocd is installed.
+- ECR Registry called 'my respsitory' created.
 
 
 
@@ -62,9 +63,11 @@ CI-CD-Pipeline-with-GitHub-Actions-Docker/
 ## 🌐 Access the Application
 After successful deployment:
 ```
-http://localhost:3000
+http://EC2_IP:5000
 ```
 ## Future Work
 1. Automate the infrastructure creation using github workflows and terraform.
 infrastructure is vpc, private subnets, ec2, security group. 
 2. Using s3 as backend to store terraform.tfstate file.
+3. Prometheus and Grafana setup for monitoring.
+4. EFK Stack setup for logging.
