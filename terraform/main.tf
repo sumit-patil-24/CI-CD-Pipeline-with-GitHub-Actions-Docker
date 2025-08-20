@@ -7,7 +7,7 @@
 provider "aws" {
   region = "us-east-1"
 }
-
+/*
 # ---------------------------------
 # VPC and Networking
 # ---------------------------------
@@ -70,14 +70,14 @@ resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private.id
   route_table_id = aws_route_table.private.id
 }
-
+*/
 # ---------------------------------
 # Security Groups
 # ---------------------------------
 
 # Security group for the EC2 instance.
 resource "aws_security_group" "instance_sg" {
-  vpc_id      = aws_vpc.main.id
+#  vpc_id      = aws_vpc.main.id
   name        = "cd-pipeline-instance-sg"
   description = "Allow inbound traffic for SSH and application ports."
 
@@ -112,11 +112,11 @@ resource "aws_security_group" "instance_sg" {
 # ---------------------------------
 
 resource "aws_instance" "cd_server" {
-  ami                         = "ami-053b04d16859e9849" # Ubuntu 24.04 LTS (us-east-1)
+  ami                         = "ami-020cba7c55df1f615" # Ubuntu 24.04 LTS (us-east-1)
   instance_type               = "t2.medium" # t2.micro might be too small for minikube
-  key_name                    = "your-key-pair" # Change to your SSH key pair name
-  subnet_id                   = aws_subnet.private.id
-  vpc_security_group_ids      = [aws_security_group.instance_sg.id]
+#  key_name                    = "new.key.pem" # Change to your SSH key pair name
+#  subnet_id                   = aws_subnet.private.id
+#  vpc_security_group_ids      = [aws_security_group.instance_sg.id]
   associate_public_ip_address = true
   user_data_base64            = filebase64("user_data.sh") # Use filebase64 for the script
 
@@ -132,7 +132,7 @@ resource "aws_instance" "cd_server" {
 /*
  * This section creates an IAM user and an IAM policy with ECR permissions
  * and attaches the policy to the user.
- */
+ *
 
 resource "aws_iam_user" "ecr_ci_user" {
   name = "ecr-ci-user"
@@ -171,3 +171,4 @@ resource "aws_iam_user_policy_attachment" "ecr_access_attachment" {
 resource "aws_iam_access_key" "ecr_ci_user_access_key" {
   user = aws_iam_user.ecr_ci_user.name
 }
+*/

@@ -1,66 +1,78 @@
 #!/bin/bash
-# user_data.sh
-# This script is executed on the EC2 instance at launch to set up the CD environment.
+sudo -i -u ubuntu bash << 'EOF'
+
 
 # ---------------------------------
-# Docker Installation
+# Docker Installation and Setup
 # ---------------------------------
-sudo apt-get update
-sudo apt-get install -y docker.io
+sudo apt update -y
+sudo apt install -y docker.io
 sudo systemctl start docker
 sudo systemctl enable docker
-sudo usermod -aG docker ubuntu
+sudo usermod -aG docker $USER
+# Apply group changes without new shell
+newgrp docker  # Better alternative to chmod 666 on docker.sock
 
 # ---------------------------------
 # Minikube, Kubectl, and Helm Installation
 # ---------------------------------
-sudo apt-get install -y conntrack
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-sudo install minikube-linux-amd64 /usr/local/bin/minikube
-
+# Install dependencies
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
-curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# Install minikube
+MINIKUBE_VERSION="v1.36.0"  # Pinned version
+curl -LO https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION}/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
+
+# Install helm
+sudo snap install helm --classic
 
 # ---------------------------------
 # Minikube Cluster Setup
 # ---------------------------------
-minikube start --driver=docker
-# Add the host's DNS to the minikube cluster to allow outbound requests.
+# Start Minikube with none driver
+minikube start
+
 minikube addons enable ingress
 
+# Verify cluster is running
+kubectl cluster-info
+
 # ---------------------------------
-# ArgoCD, Grafana, and Prometheus Installation (via Helm)
+# Helm Repositories
 # ---------------------------------
+helm repo add argo https://argoproj.github.io/argo-helm
 
-# Add the ArgoCD Helm repository
-helm repo add argo https://argoproj.io/argo-helm
 
-# Add the Prometheus community Helm repository
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-
-# Update Helm repositories
 helm repo update
 
-# Install Prometheus and Grafana for monitoring
-helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
 
-# Install ArgoCD for GitOps deployment
-helm install argocd argo/argo-cd --namespace argocd --create-namespace
+
+# ---------------------------------
+# Install ArgoCD
+# ---------------------------------
+kubectl create namespace argocd
+helm install argocd argo/argo-cd \
+  --namespace argocd \
+  --set server.service.type=NodePort  # Avoid needing LoadBalancer
 
 # Wait for ArgoCD to be ready
-sleep 60
+echo "Waiting for ArgoCD to be ready..."
+kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
+
+# Get ArgoCD password
 ARGO_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 echo "ArgoCD initial admin password: $ARGO_PASSWORD"
 
-# Expose ArgoCD with Minikube tunnel
-minikube tunnel &
+# Port-forward ArgoCD (alternative to tunnel)
+echo "To access ArgoCD UI, run: kubectl port-forward svc/argocd-server -n argocd 8080:443 &"
 
 # ---------------------------------
-# Create and Apply ArgoCD Manifest
+# Create and Apply ArgoCD Application
 # ---------------------------------
-# We use a heredoc to create the file locally without a clone or URL.
+
 cat <<EOF > argocd-application.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -72,7 +84,7 @@ spec:
   source:
     repoURL: https://github.com/sumit-patil-24/Zero_Touch_Automation_Project.git
     targetRevision: HEAD
-    path: helm
+    path: helm-chart
   destination:
     server: https://kubernetes.default.svc
     namespace: default
@@ -82,5 +94,14 @@ spec:
       selfHeal: true
 EOF
 
-# Apply the ArgoCD application manifest
+
 kubectl apply -f argocd-application.yaml
+
+echo "Setup completed successfully!"
+
+sleep 200
+
+kubectl port-forward service/argocd-server -n argocd  8080:443 --address=0.0.0.0 &
+kubectl port-forward service/my-application-helm-chart 8000:80 --address=0.0.0.0 &
+kubectl port-forward svc/prometheus-2-grafana -n monitoring 3000:80 --address=0.0.0.0 &
+kubectl port-forward svc/prometheus-2-kube-promethe-prometheus -n monitoring 9090:9090 --address=0.0.0.0 &
