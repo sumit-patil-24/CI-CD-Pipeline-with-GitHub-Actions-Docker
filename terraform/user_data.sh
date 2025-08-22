@@ -11,7 +11,7 @@ sudo systemctl start docker
 sudo systemctl enable docker
 sudo usermod -aG docker $USER
 # Apply group changes without new shell
-newgrp docker  # Better alternative to chmod 666 on docker.sock
+newgrp docker # Better alternative to chmod 666 on docker.sock
 
 # ---------------------------------
 # Minikube, Kubectl, and Helm Installation
@@ -22,7 +22,7 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 
 # Install minikube
-MINIKUBE_VERSION="v1.36.0"  # Pinned version
+MINIKUBE_VERSION="v1.36.0" # Pinned version
 curl -LO https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION}/minikube-linux-amd64
 sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
 
@@ -56,7 +56,7 @@ helm repo update
 kubectl create namespace argocd
 helm install argocd argo/argo-cd \
   --namespace argocd \
-  --set server.service.type=NodePort  # Avoid needing LoadBalancer
+  --set server.service.type=NodePort # Avoid needing LoadBalancer
 
 # Wait for ArgoCD to be ready
 echo "Waiting for ArgoCD to be ready..."
@@ -73,7 +73,8 @@ echo "To access ArgoCD UI, run: kubectl port-forward svc/argocd-server -n argocd
 # Create and Apply ArgoCD Application
 # ---------------------------------
 
-cat <<EOF > argocd-application.yaml
+# This section has been corrected to properly create the file
+cat > argocd-application.yaml << 'EOT'
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -92,7 +93,7 @@ spec:
     automated:
       prune: true
       selfHeal: true
-EOF
+EOT
 
 
 kubectl apply -f argocd-application.yaml
@@ -103,5 +104,4 @@ sleep 200
 
 kubectl port-forward service/argocd-server -n argocd  8080:443 --address=0.0.0.0 &
 kubectl port-forward service/my-application-helm-chart 8000:80 --address=0.0.0.0 &
-kubectl port-forward svc/prometheus-2-grafana -n monitoring 3000:80 --address=0.0.0.0 &
-kubectl port-forward svc/prometheus-2-kube-promethe-prometheus -n monitoring 9090:9090 --address=0.0.0.0 &
+EOF
